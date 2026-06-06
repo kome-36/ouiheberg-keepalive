@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Engineering the Future</title>
+    <style>
+        /* Core CSS Variables & Dark Mode Support */
+        :root {
+            --bg-primary: #f5f5f7;
+            --bg-secondary: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --nav-bg: rgba(255, 255, 255, 0.72);
+            --accent: #2997ff;
+            --border: #d2d2d7;
+            --shadow-subtle: 0 4px 14px rgba(0,0,0,0.02);
+            --shadow-hover: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #000000;
+                --bg-secondary: #1c1c1e;
+                --text-primary: #f5f5f7;
+                --text-secondary: #a1a1a6;
+                --nav-bg: rgba(0, 0, 0, 0.72);
+                --accent: #2997ff;
+                --border: #424245;
+                --shadow-subtle: 0 4px 14px rgba(0,0,0,0.4);
+                --shadow-hover: 0 10px 40px rgba(0,0,0,0.6);
+            }
+        }
+
+        /* Reset & Typography */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.47059;
+            letter-spacing: -0.022em;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* Frosted Glass Navigation */
+        nav {
+            position: fixed;
+            top: 0; width: 100%; height: 48px;
+            background: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 999;
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links {
+            display: flex; gap: 48px; list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 12px; font-weight: 400; color: var(--text-primary);
+            opacity: 0.8; transition: opacity 0.2s;
+        }
+
+        .nav-links a:hover { opacity: 1; }
+
+        /* Full-Bleed Hero Section */
+        .hero {
+            position: relative;
+            height: 85vh;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .hero-img {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+            z-index: 1;
+            transform: scale(1.05);
+            animation: slowZoom 20s infinite alternate linear;
+        }
+
+        @keyframes slowZoom {
+            0% { transform: scale(1.05); }
+            100% { transform: scale(1.15); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding: 0 20px;
+            color: #fff;
+        }
+
+        .hero h1 {
+            font-size: 80px;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 28px;
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-primary {
+            background-color: #fff;
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 980px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            background-color: #f5f5f7;
+        }
+
+        /* Main Content & Bento Box Grid */
+        main {
+            max-width: 1200px;
+            margin: -60px auto 100px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+
+        /* Bento Card Styles */
+        .bento-card {
+            background-color: var(--bg-secondary);
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: var(--shadow-subtle);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .bento-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .bento-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0; left: 0;
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .bento-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+            padding: 40px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+            color: #fff;
+        }
+
+        /* Grid Spans for Bento Layout */
+        .card-large { grid-column: span 12; height: 500px; }
+        .card-medium { grid-column: span 8; height: 400px; }
+        .card-small { grid-column: span 4; height: 400px; }
+        .card-half { grid-column: span 6; height: 450px; }
+
+        .tag {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .bento-card h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.1;
+        }
+
+        .bento-card p {
+            font-size: 17px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Dark overlay for lighter text readability on images */
+        .card-dark-text .card-content {
+            background: none;
+            color: var(--text-primary);
+            justify-content: flex-start;
+        }
+        
+        .card-dark-text .tag { color: var(--text-secondary); }
+        .card-dark-text p { color: var(--text-secondary); }
+
+        /* Footer */
+        footer {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .card-medium, .card-small { grid-column: span 6; }
+            .hero h1 { font-size: 60px; }
+        }
+
+        @media (max-width: 768px) {
+            .card-large, .card-medium, .card-small, .card-half { grid-column: span 12; height: 350px; }
+            .hero h1 { font-size: 48px; }
+            .hero p { font-size: 21px; }
+            .bento-card h3 { font-size: 24px; }
+            .nav-links { gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Apple-style Frosted Glass Navbar -->
+    <nav>
+        <ul class="nav-links">
+            <li><a href="#">Overview</a></li>
+            <li><a href="#">Architecture</a></li>
+            <li><a href="#">Deployments</a></li>
+            <li><a href="#">Insights</a></li>
+        </ul>
+    </nav>
+
+    <!-- Full Bleed Cinematic Hero Section -->
+    <header class="hero">
+        <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=2850&q=80" alt="Server Infrastructure" class="hero-img">
+        <div class="hero-content">
+            <h1>Pro-Level Infrastructure.</h1>
+            <p>Exploring the absolute limits of VPS deployment, proxy configurations, and server architecture.</p>
+            <a href="#latest" class="btn-primary">Explore Latest Work</a>
+        </div>
+    </header>
+
+    <!-- Bento Box Grid Layout -->
+    <main id="latest">
+        <div class="bento-grid">
+            
+            <!-- Large Feature Card -->
+            <div class="bento-card card-large">
+                <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=2000&q=80" alt="Server Racks">
+                <div class="card-content">
+                    <span class="tag">The Ultimate Showdown</span>
+                    <h3>SSH Client Supremacy.</h3>
+                    <p>A deep dive benchmarking Xshell, FinalShell, and Termius. Visualizing SFTP workflows, measuring raw startup speeds, and determining the undisputed champion of server management UI.</p>
+                </div>
+            </div>
+
+            <!-- Medium Feature Card -->
+            <div class="bento-card card-medium">
+                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80" alt="Global Network">
+                <div class="card-content">
+                    <span class="tag">Network Proxy</span>
+                    <h3>Routing Redefined.</h3>
+                    <p>Mastering complex node connectivity. Comparing WPF and Avalonia frameworks for v2rayN and Clash, streamlining subscription extractions, and guaranteeing zero-downtime traffic.</p>
+                </div>
+            </div>
+
+            <!-- Small Feature Card (Solid Color / No Background Image for Contrast) -->
+            <div class="bento-card card-small card-dark-text" style="background-color: var(--bg-secondary);">
+                <div class="card-content">
+                    <span class="tag">Domain Protocol</span>
+                    <h3>.tokenized.name</h3>
+                    <p>Resolving the Doma Protocol ecosystem. Navigating Cloudflare reverse proxy conflicts and bypassing free-tier email subaddressing limitations for decentralized domains.</p>
+                </div>
+            </div>
+
+            <!-- Half Width Feature Card 1 -->
+            <div class="bento-card card-half">
+                <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1000&q=80" alt="AI Abstract">
+                <div class="card-content">
+                    <span class="tag">AI Benchmarking</span>
+                    <h3>DeepSeek V4 vs Claude.</h3>
+                    <p>Reconstructing complex prompt engineering to test the absolute limits of LLM animation capabilities and logical reasoning.</p>
+                </div>
+            </div>
+
+            <!-- Half Width Feature Card 2 -->
+            <div class="bento-card card-half">
+                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80" alt="Hardware">
+                <div class="card-content">
+                    <span class="tag">Hardware Limits</span>
+                    <h3>VPS Resource Optimization.</h3>
+                    <p>Squeezing every ounce of performance from entry-level servers. Balancing CPU allocation, memory limits, and traffic caps for intensive web deployments.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Minimalist Footer -->
+    <footer>
+        <p>Copyright © 2026. All rights reserved. Designed for optimal performance.</p>
+    </footer>
+
+</body>
+</html>
