@@ -14,6 +14,8 @@ jobs:
           STATUS=$(curl -s -X GET \
             -H "Authorization: Bearer ${{ secrets.PANEL_TOKEN }}" \
             -H "Accept: application/json" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36" \
+            -H "Cookie: cf_clearance=${{ secrets.CF_CLEARANCE }}" \
             https://ouipanel.com/api/client/servers/9da47c09/resources \
             | grep -o '"current_state":"[^"]*"' | cut -d'"' -f4)
           
@@ -24,6 +26,8 @@ jobs:
               -H "Authorization: Bearer ${{ secrets.PANEL_TOKEN }}" \
               -H "Content-Type: application/json" \
               -H "Accept: application/json" \
+              -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36" \
+              -H "Cookie: cf_clearance=${{ secrets.CF_CLEARANCE }}" \
               -d '{"signal":"start"}' \
               https://ouipanel.com/api/client/servers/9da47c09/power
             echo "Start signal sent"
