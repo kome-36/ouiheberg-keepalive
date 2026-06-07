@@ -1,0 +1,32 @@
+name: Auto Start Server
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  check-and-start:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check and Start Server
+        run: |
+          STATUS=$(curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.PANEL_TOKEN }}" \
+            -H "Accept: application/json" \
+            https://ouipanel.com/api/client/servers/9da47c09/resources \
+            | grep -o '"current_state":"[^"]*"' | cut -d'"' -f4)
+          
+          echo "Current status: $STATUS"
+          
+          if [ "$STATUS" != "running" ]; then
+            curl -X POST \
+              -H "Authorization: Bearer ${{ secrets.PANEL_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -H "Accept: application/json" \
+              -d '{"signal":"start"}' \
+              https://ouipanel.com/api/client/servers/9da47c09/power
+            echo "Start signal sent"
+          else
+            echo "Server is running, no action needed"
+          fi
