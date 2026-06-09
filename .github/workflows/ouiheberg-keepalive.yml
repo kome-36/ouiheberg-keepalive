@@ -1,108 +1,36 @@
 name: Auto Start Server
 
 on:
-  push:
-    paths:
-      - '.github/workflows/auto-start.yml'
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
-concurrency:
-  group: auto-start-server
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
 jobs:
   check-and-start:
     runs-on: ubuntu-latest
-
-    env:
-      PANEL_URL: https://ouipanel.com
-      SERVER_ID: 9da47c09
-      PANEL_TOKEN: ${{ secrets.PANEL_TOKEN }}
-
     steps:
       - name: Check and Start Server
-        shell: bash
         run: |
-          set -euo pipefail
-
-          API_ACCEPT="Application/vnd.pterodactyl.v1+json"
-
-          RESOURCES_URL="$PANEL_URL/api/client/servers/$SERVER_ID/resources"
-          POWER_URL="$PANEL_URL/api/client/servers/$SERVER_ID/power"
-
-          echo "Checking server status..."
-
-          RESPONSE_FILE=$(mktemp)
-
-          HTTP_CODE=$(curl -sS \
-            --connect-timeout 15 \
-            --max-time 30 \
-            -o "$RESPONSE_FILE" \
-            -w "%{http_code}" \
-            -H "Authorization: Bearer $PANEL_TOKEN" \
-            -H "Accept: $API_ACCEPT" \
-            -H "Content-Type: application/json" \
-            "$RESOURCES_URL")
-
-          echo "GET HTTP CODE: $HTTP_CODE"
-
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "Failed to access API."
-            echo "Response:"
-            head -c 2000 "$RESPONSE_FILE" || true
-            exit 1
-          fi
-
-          STATUS=$(python3 -c 'import json,sys; data=json.load(open(sys.argv[1], encoding="utf-8")); print(data.get("attributes",{}).get("current_state",""))' "$RESPONSE_FILE")
-
+          STATUS=$(curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.PANEL_TOKEN }}" \
+            -H "Accept: application/json" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36" \
+            -H "Cookie: cf_clearance=${{ secrets.CF_CLEARANCE }}" \
+            https://ouipanel.com/api/client/servers/9da47c09/resources \
+            | grep -o '"current_state":"[^"]*"' | cut -d'"' -f4)
+          
           echo "Current status: $STATUS"
-
-          if [ "$STATUS" = "running" ] || [ "$STATUS" = "starting" ]; then
-            echo "Server already running or starting."
-            exit 0
+          
+          if [ "$STATUS" != "running" ]; then
+            curl -X POST \
+              -H "Authorization: Bearer ${{ secrets.PANEL_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -H "Accept: application/json" \
+              -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36" \
+              -H "Cookie: cf_clearance=${{ secrets.CF_CLEARANCE }}" \
+              -d '{"signal":"start"}' \
+              https://ouipanel.com/api/client/servers/9da47c09/power
+            echo "Start signal sent"
+          else
+            echo "Server is running, no action needed"
           fi
-
-          if [ "$STATUS" = "stopping" ]; then
-            echo "Server is stopping. Skip this run."
-            exit 0
-          fi
-
-          if [ "$STATUS" != "offline" ] && [ "$STATUS" != "stopped" ]; then
-            echo "Unknown server status: $STATUS"
-            echo "Response:"
-            cat "$RESPONSE_FILE"
-            exit 1
-          fi
-
-          echo "Server is offline. Sending start signal..."
-
-          START_RESPONSE=$(mktemp)
-
-          START_CODE=$(curl -sS \
-            -X POST \
-            --connect-timeout 15 \
-            --max-time 30 \
-            -o "$START_RESPONSE" \
-            -w "%{http_code}" \
-            -H "Authorization: Bearer $PANEL_TOKEN" \
-            -H "Accept: $API_ACCEPT" \
-            -H "Content-Type: application/json" \
-            -d '{"signal":"start"}' \
-            "$POWER_URL")
-
-          echo "POST HTTP CODE: $START_CODE"
-
-          if [ "$START_CODE" = "204" ]; then
-            echo "Server started successfully."
-            exit 0
-          fi
-
-          echo "Start request failed."
-          echo "Response:"
-          head -c 2000 "$START_RESPONSE" || true
-          exit 1
